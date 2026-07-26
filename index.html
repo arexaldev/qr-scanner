@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR SCAN</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        font-family:
+          "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+      }
+
+      #area-kamera,
+      #preview-kamera {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        background-color: #f0f0f0;
+        transition: background-color 0.2 ease;
+      }
+
+      button:hover {
+        background-color: bisque;
+      }
+
+      #area-hasil {
+        text-align: center;
+      }
+
+      #area-tombol-aksi {
+        margin-top: 10px;
+      }
+
+      .container{
+        background-color: silver;
+        padding: 10px;  
+      }
+    </style>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+  </head>
+  <body>
+    <div class="container">
+    <!-- tombol pilihan antara scan atau upload -->
+    <div class="tombol-pilihan" id="pilihan-menu">
+      <button id="btn-kamera">Scan QR Code</button>
+      <button id="btn-upload">Upload QR Code</button>
+    </div>
+
+    <!-- hidden file input -->
+    <input type="file" id="input-file" accept="image/*" style="display: none" />
+
+    <!-- wadah stream kamera -->
+    <div id="area-kamera" style="display: none">
+      <div id="preview-kamera" style="width: 100%; max-width: 500px"></div>
+      <button id="btn-stop">Batalkan</button>
+    </div>
+
+    <!-- hasil scan -->
+    <div id="area-hasil">
+      <h3>Hasil Scan:</h3>
+      <p id="teks-hasil">Belum ada hasil scan...</p>
+    </div>
+
+    <div id="area-tombol-aksi" style="display: none">
+      <button id="btn-copy">Salin Link</button>
+      <a id="btn-buka-link" href="#" target="_blank" rel="noopener noreferrer">
+        <button>Buka Link</button>
+      </a>
+    </div>
+
+    </div>
+    <footer>&copy; 2025 Arexal Dev. All Rights Reserved.</footer>
+
+
+    <script>
+      const btnKamera = document.getElementById("btn-kamera");
+      const btnUpload = document.getElementById("btn-upload");
+      const btnStop = document.getElementById("btn-stop");
+      const inputFile = document.getElementById("input-file");
+      const areaKamera = document.getElementById("area-kamera");
+      const teksHasil = document.getElementById("teks-hasil");
+      const areaTombolAksi = document.getElementById("area-tombol-aksi");
+      const btnCopy = document.getElementById("btn-copy");
+      const btnBukaLink = document.getElementById("btn-buka-link");
+
+      const html5QrCode = new Html5Qrcode("preview-kamera");
+
+      // jalur upload gambar
+      btnUpload.addEventListener("click", () => {
+        inputFile.click();
+      });
+
+      inputFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return; 
+
+        html5QrCode
+          .scanFile(file, true)
+          .then((decodedText) => {
+            tampilkanHasil(decodedText);
+          })
+          .catch((err) => {
+            teksHasil.innerText = "QR Code tidak ditemukan pada gambar.";
+            areaTombolAksi.style.display = "none";
+          });
+      });
+
+      // jalur scan kamera
+      function stopKamera() {
+        html5QrCode
+          .stop()
+          .then(() => {
+            areaKamera.style.display = "none";
+          })
+          .catch((err) => console.error("Gagal stop kamera: ", err));
+      }
+
+      btnStop.addEventListener("click", stopKamera);
+
+      btnKamera.addEventListener("click", () => {
+        areaKamera.style.display = "block";
+
+        html5QrCode
+          .start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+              tampilkanHasil(decodedText);
+
+              stopKamera();
+            },
+            (errorMessage) => {},
+          )
+          .catch((err) => {
+            teksHasil.innerText =
+              "Gagal mengakses kamera. Pastikan izin diberikan.";
+            areaKamera.style.display = "none";
+          });
+      });
+
+      function tampilkanHasil(hasilText) {
+        teksHasil.innerText = hasilText;
+        areaTombolAksi.style.display = "block";
+
+        let validUrl = hasilText;
+
+        if (
+          !hasilText.startsWith("http://") &&
+          !hasilText.startsWith("https://")
+        ) {
+          validUrl = "https://" + hasilText;
+        }
+
+        btnBukaLink.href = validUrl;
+      }
+
+      btnCopy.addEventListener("click", () => {
+        const teks = teksHasil.innerText;
+
+        // Clipboard API bawaan browser buat salin teks
+        navigator.clipboard
+          .writeText(teks)
+          .then(() => {
+            alert("Link berhasil disalin!");
+          })
+          .catch((err) => {
+            console.error("Gagal menyalin teks: ", err);
+          });
+      });
+    </script>
+  </body>
+</html>
