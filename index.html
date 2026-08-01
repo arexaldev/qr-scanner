@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR SCAN - Arexal Dev</title>
+    <title>QR SCAN</title>
     <style>
       body {
         display: flex;
@@ -15,7 +15,7 @@
         margin: 0;
         padding: 20px;
         box-sizing: border-box;
-        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       }
 
       #area-kamera,
@@ -47,11 +47,17 @@
         margin-top: 10px;
       }
 
+      #teks-hasil {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
+
     </style>
     <script src="https://unpkg.com/html5-qrcode"></script>
   </head>
   <body>
-    <div class="container">
+    
     <!-- tombol pilihan antara scan atau upload -->
     <div class="tombol-pilihan" id="pilihan-menu">
       <button id="btn-kamera">Scan QR Code</button>
@@ -80,7 +86,6 @@
       </a>
     </div>
 
-    </div>
     <footer>&copy; 2025 Arexal Dev. All Rights Reserved.</footer>
 
 
